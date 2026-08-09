@@ -1,0 +1,18 @@
+<section class="page login-page">
+  <h2>Login</h2>
+  <form (ngSubmit)="submit()" class="login-form">
+    <label>
+      Username
+      <input name="username" [(ngModel)]="username" required />
+    </label>
+
+    <label>
+      Password
+      <input name="password" type="password" [(ngModel)]="password" required />
+    </label>
+
+    <button type="submit" [disabled]="isLoading">Login</button>
+  </form>
+
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+</section>

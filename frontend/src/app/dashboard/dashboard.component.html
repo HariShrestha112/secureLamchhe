@@ -1,0 +1,76 @@
+<section class="page dashboard-page">
+  <ng-container *ngIf="profile; else noUser">
+    <div class="dashboard-header">
+      <div class="avatar-frame">
+        <img [src]="avatarUrl" alt="User avatar" />
+      </div>
+      <div class="user-summary">
+        <h2>Welcome, {{ profile.fullName }}</h2>
+        <p class="subtitle">Username: {{ profile.username }}</p>
+        <p class="subtitle">Contact: {{ profile.contact }}</p>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div><strong>Email</strong>: {{ profile.email }}</div>
+      <div><strong>Address</strong>: {{ profile.address }}</div>
+      <div><strong>Facebook</strong>: <a [href]="profile.facebook" target="_blank">{{ profile.facebook }}</a></div>
+      <div><strong>Bio</strong>: {{ profile.bio }}</div>
+    </div>
+
+
+
+    <section class="measurements">
+      <h3>Cloth Measurements</h3>
+      <form (ngSubmit)="saveMeasurements()" class="measure-form">
+        <label>Chest: <input [(ngModel)]="measurements.chest" name="chest" /></label>
+        <label>Waist: <input [(ngModel)]="measurements.waist" name="waist" /></label>
+        <label>Hips: <input [(ngModel)]="measurements.hips" name="hips" /></label>
+        <label>Sleeve: <input [(ngModel)]="measurements.sleeve" name="sleeve" /></label>
+        <label>Length: <input [(ngModel)]="measurements.length" name="length" /></label>
+        <div class="measure-actions"><button type="submit">Save Measurements</button></div>
+      </form>
+    </section>
+
+    <section class="image-library">
+      <h3>Image Library</h3>
+      <div class="add-image">
+        <input placeholder="Image URL" [(ngModel)]="newImageUrl" name="newImageUrl" />
+        <button (click)="addImage()">Add</button>
+        <label class="upload">
+          <input type="file" (change)="handleFileInput($event)" accept="image/*" multiple />
+          Upload
+        </label>
+      </div>
+
+      <div class="gallery">
+        <div class="thumb" *ngFor="let img of imageLibrary; let i = index">
+          <img [src]="img" alt="img" (click)="selectImage(i)" [class.selected]="selectedImage===img" />
+          <button class="remove" (click)="removeImage(i)">Remove</button>
+        </div>
+      </div>
+    
+      <!-- zoom modal -->
+      <div class="image-modal" *ngIf="selectedImage" (click)="closeSelectedImage()">
+        <img [src]="selectedImage" alt="Zoomed image" (click)="$event.stopPropagation()" />
+      </div>
+    </section>
+
+    <section class="interests">
+      <h3>Sharing Interests</h3>
+      <div class="interest-input">
+        <input placeholder="Type an interest (e.g., floral, linen)" [(ngModel)]="newInterest" name="newInterest" />
+        <button (click)="addInterest()">Add</button>
+      </div>
+
+      <div class="interest-list">
+        <span class="tag" *ngFor="let it of interests; let i = index">{{ it }} <button class="x" (click)="removeInterest(i)">×</button></span>
+      </div>
+    </section>
+
+  </ng-container>
+
+  <ng-template #noUser>
+    <p>You are not logged in. Please <a routerLink="/login">login</a> first.</p>
+  </ng-template>
+</section>

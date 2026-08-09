@@ -1,0 +1,14 @@
+<div class="app-shell">
+  <header class="app-header">
+    <h1>{{ title() }}</h1>
+    <nav>
+      <a *ngIf="!isLogged()" routerLink="/login">Login</a>
+      <a routerLink="/dashboard">Dashboard</a>
+      <button *ngIf="isLogged()" class="btn-logout" (click)="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>
