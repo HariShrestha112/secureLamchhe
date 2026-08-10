@@ -36,7 +36,10 @@ export class LoginComponent {
       next: (response) => {
         this.isLoading = false;
         if (response.success) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/dashboard']).catch((navErr) => {
+            console.error('Navigation failed:', navErr);
+            this.error = 'Navigation failed. Please try again.';
+          });
         } else {
           this.error = response.message;
         }

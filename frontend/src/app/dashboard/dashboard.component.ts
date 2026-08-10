@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { InfoService, UserProfile } from '../info.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   profile: UserProfile | null;
   avatarUrl = `https://i.pravatar.cc/320?img=${Math.floor(Math.random() * 70) + 1}`;
   measurements: { chest?: string; waist?: string; hips?: string; sleeve?: string; length?: string } = {};
@@ -20,15 +20,35 @@ export class DashboardComponent {
   selectedImage: string | null = null;
   interests: string[] = [];
   newInterest = '';
+  sewingAmountDue: number | null = null;
+  backendError = '';
+  sewingStatus: string | null = null;
+  sewingStatusLoaded = false;
+  processingDressName = '';
+  processingDressComment = '';
+  completedDressName = '';
+  unstitchDresses: { dressName: string }[] = [];
+  unstitchLoaded = false;
+  statusSteps = ['about to process', 'processing', 'done'];
 
-  constructor(private infoService: InfoService, private router: Router) {
+  constructor(private infoService: InfoService, private router: Router, private cdr: ChangeDetectorRef) {
+    this.profile = null;
+  }
+
+  ngOnInit() {
     this.profile = this.infoService.loadStoredUser();
     if (!this.profile) {
       this.router.navigate(['/login']);
+      return;
     }
     this.loadMeasurements();
     this.loadImageLibrary();
     this.loadInterests();
+    this.loadUserProfile();
+    this.loadSewingStatus();
+    this.loadProcessingDress();
+    this.loadUnstitchDresses();
+    this.loadCompletedDress();
   }
 
   logout() {
@@ -129,6 +149,93 @@ export class DashboardComponent {
     this.interests.unshift(v);
     this.newInterest = '';
     this.saveInterests();
+  }
+
+  loadSewingStatus(retries = 1) {
+    console.log('[Dashboard] loadSewingStatus start', { retries });
+    this.backendError = '';
+    this.sewingAmountDue = null;
+    this.sewingStatus = null;
+    this.sewingStatusLoaded = false;
+
+    this.infoService.getSewingStatus().subscribe({
+      next: (response) => {
+        console.log('[Dashboard] sewing status response', response);
+        this.sewingStatus = response.status ?? 'about to process';
+        this.sewingAmountDue = response.amountDue ?? 0;
+        this.sewingStatusLoaded = true;
+        if (this.sewingStatus === 'done') {
+          this.loadCompletedDress();
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('[Dashboard] Failed to load sewing status', err);
+        if (retries > 0) {
+          setTimeout(() => this.loadSewingStatus(retries - 1), 1000);
+        } else {
+          this.backendError = 'Unable to load sewing status from backend.';
+        }
+      },
+    });
+  }
+
+  loadUserProfile() {
+    console.log('[Dashboard] loading backend user profile');
+    this.infoService.getUserProfile().subscribe({
+      next: (response) => {
+        console.log('[Dashboard] backend profile response', response);
+        if (response) {
+          this.profile = response;
+          try {
+            localStorage.setItem('userProfile', JSON.stringify(response));
+          } catch {
+            // ignore local storage errors
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load backend user profile', err);
+        this.backendError = 'Unable to load user profile from backend.';
+      },
+    });
+  }
+
+  loadProcessingDress() {
+    this.infoService.getProcessingDress().subscribe({
+      next: (response) => {
+        this.processingDressName = response.dressName;
+        this.processingDressComment = response.comment;
+      },
+      error: (err) => {
+        console.error('Failed to load processing dress info', err);
+      },
+    });
+  }
+
+  loadUnstitchDresses() {
+    this.unstitchLoaded = false;
+    this.infoService.getUnstitchDresses().subscribe({
+      next: (response) => {
+        this.unstitchDresses = response.unstitchDresses || [];
+        this.unstitchLoaded = true;
+      },
+      error: (err) => {
+        console.error('Failed to load unstitch dress list', err);
+        this.unstitchLoaded = true;
+      },
+    });
+  }
+
+  loadCompletedDress() {
+    this.infoService.getCompletedDress().subscribe({
+      next: (response) => {
+        this.completedDressName = response.dressName || this.completedDressName;
+      },
+      error: (err) => {
+        console.error('Failed to load completed dress info', err);
+      },
+    });
   }
 
   removeInterest(i: number) {

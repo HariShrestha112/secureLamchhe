@@ -11,7 +11,7 @@ import { InfoService } from './info.service';
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('SecureLamchhe');
+  protected readonly title = signal('Secure Lamchhe Clothing and Sewing Customer Portal');
 
   constructor(private info: InfoService, private router: Router) {}
 

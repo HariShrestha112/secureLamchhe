@@ -1,22 +1,19 @@
 import { Component } from '@angular/core';
-import { InfoService } from './info.service';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
+  imports: [RouterOutlet],
   template: `
-    <div style="padding: 20px;">
-      <button (click)="submitData()">Send Info to Java Backend</button>
+    <div class="app-shell">
+      <header class="app-header">
+        <h1>SecureLamchhe</h1>
+      </header>
+      <main>
+        <router-outlet></router-outlet>
+      </main>
     </div>
   `
 })
-export class AppComponent {
-  constructor(private infoService: InfoService) {}
-
-  submitData() {
-    this.infoService.sendInformation('Hello from Angular Angular!').subscribe({
-      next: (response) => console.log('Response received:', response),
-      error: (error) => console.error('Error occurred:', error)
-    });
-  }
-}
+export class AppComponent {}

@@ -1,5 +1,6 @@
 <section class="page dashboard-page">
   <ng-container *ngIf="profile; else noUser">
+    <div *ngIf="backendError" class="backend-error">{{ backendError }}</div>
     <div class="dashboard-header">
       <div class="avatar-frame">
         <img [src]="avatarUrl" alt="User avatar" />
@@ -18,7 +19,66 @@
       <div><strong>Bio</strong>: {{ profile.bio }}</div>
     </div>
 
+    <section class="sewing-status-card">
+      <h2>Your Sewing Status</h2>
+      <div class="status-grid">
+        <div class="status-item">
+          <label>Amount Due</label>
+          <div class="amount-display">
+            <ng-container *ngIf="sewingStatusLoaded; else amountLoading">
+              $ {{ sewingAmountDue | number:'1.0-2' }}
+            </ng-container>
+            <ng-template #amountLoading>Loading...</ng-template>
+          </div>
+        </div>
 
+        <div class="status-item">
+          <label>Processing Status</label>
+          <div class="status-bar">
+            <div class="progress-track">
+              <div class="progress-fill" [class.about-to-process]="sewingStatus === 'about to process'" [class.processing]="sewingStatus === 'processing'" [class.done]="sewingStatus === 'done'"></div>
+              <div class="progress-labels" *ngIf="sewingStatusLoaded">
+                <span class="progress-label" [class.active]="sewingStatus === step" *ngFor="let step of statusSteps"></span>
+              </div>
+              <div class="progress-loading" *ngIf="!sewingStatusLoaded">Loading...</div>
+            </div>
+          </div>
+          <div class="current-status">
+            <strong>Status: </strong>
+            <span *ngIf="sewingStatusLoaded; else statusLoading" style="font-weight: bold; color: green">{{ sewingStatus }}</span>
+            <ng-template #statusLoading>Loading...</ng-template>
+          </div>
+        </div>
+      </div>
+
+      <div class="processing-dress">
+        <h4>Processing Dress</h4>
+        <div class="processing-field">
+          <strong>Name:</strong> {{ processingDressName || 'Loading...' }}
+        </div>
+        <div class="processing-field">
+          <strong>Comment:</strong> {{ processingDressComment || 'Loading...' }}
+        </div>
+        <div class="processing-field completed-dress">
+          <strong>Completed Dress:</strong> {{ completedDressName || 'Loading...' }}
+        </div>
+      </div>
+
+      <div class="unstitch-list">
+        <h4>Dresses Waiting for Stitching</h4>
+        <ng-container *ngIf="unstitchLoaded; else unstitchLoading">
+          <ul *ngIf="unstitchDresses.length > 0; else noUnstitchList">
+            <li *ngFor="let dress of unstitchDresses">{{ dress.dressName }}</li>
+          </ul>
+          <ng-template #noUnstitchList>
+            <p>No dresses waiting for stitching.</p>
+          </ng-template>
+        </ng-container>
+        <ng-template #unstitchLoading>
+          <p>Loading unstitch dress list...</p>
+        </ng-template>
+      </div>
+    </section>
 
     <section class="measurements">
       <h3>Cloth Measurements</h3>
