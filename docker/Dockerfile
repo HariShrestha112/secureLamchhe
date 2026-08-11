@@ -1,7 +1,7 @@
 ## Multi-stage Dockerfile: build frontend and backend, produce a runnable JAR image
 
 ### Stage 1: build frontend
-FROM node:18-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 WORKDIR /workspace/frontend
 COPY frontend/package*.json ./
 COPY frontend/tsconfig*.json ./
