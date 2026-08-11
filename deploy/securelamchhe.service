@@ -1,0 +1,14 @@
+[Unit]
+Description=SecureLamchhe Spring Boot Application
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/securelamchhe
+ExecStart=/usr/bin/java -jar /opt/securelamchhe/app.jar
+Restart=on-failure
+Environment=JAVA_OPTS=-Xms256m -Xmx512m
+
+[Install]
+WantedBy=multi-user.target
